@@ -29,6 +29,7 @@ const CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
   EDUCATION: { label: 'La cocina del bajo', color: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
   CULTURE: { label: 'Cultura del bajo', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
   HUMOR: { label: 'Humor bajístico', color: 'bg-pink-500/20 text-pink-300 border-pink-500/30' },
+  GROWTH: { label: 'Imán de seguidores (Growth)', color: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30' },
 };
 
 const STATUS_BADGES: Record<string, { label: string; color: string }> = {

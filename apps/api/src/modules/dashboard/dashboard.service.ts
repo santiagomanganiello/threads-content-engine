@@ -47,7 +47,8 @@ export class DashboardService {
       todayBatch: {
         batchId: todayBatchId,
         generatedCount: todayBatchCount,
-        isCompleted: todayBatchCount >= 3,
+        targetCount: 4,
+        isCompleted: todayBatchCount >= 4,
       },
       recentPosts,
     };

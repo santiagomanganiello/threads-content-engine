@@ -56,6 +56,7 @@ export const ManualGenerateModal: React.FC<ManualGenerateModalProps> = ({
               <option value="BASS_HISTORY">Bajos que cambiaron el mundo (Historia)</option>
               <option value="COMMUNITY">Bajista, si tuvieras que… (Comunidad & Debate)</option>
               <option value="EDUCATION">La cocina del bajo (Técnica & Tips)</option>
+              <option value="GROWTH">Imán de seguidores (Crecimiento & Viralidad)</option>
               <option value="CULTURE">Cultura musical</option>
               <option value="HUMOR">Humor bajístico</option>
             </select>

@@ -13,6 +13,7 @@
     "db:migrate": "prisma migrate dev --schema=prisma/schema.prisma",
     "db:generate": "prisma generate --schema=prisma/schema.prisma",
     "db:studio": "prisma studio --schema=prisma/schema.prisma",
+    "verify:threads": "pnpm --filter @threads-engine/api run verify:threads",
     "test": "vitest run"
   },
   "devDependencies": {

@@ -153,6 +153,7 @@ export const App: React.FC = () => {
               <option value="BASS_HISTORY">Bajos que cambiaron el mundo</option>
               <option value="COMMUNITY">Bajista, si tuvieras que…</option>
               <option value="EDUCATION">La cocina del bajo</option>
+              <option value="GROWTH">Imán de seguidores (Growth)</option>
               <option value="CULTURE">Cultura</option>
               <option value="HUMOR">Humor</option>
             </select>
@@ -180,7 +181,7 @@ export const App: React.FC = () => {
             <Inbox className="w-12 h-12 text-neutral-600 mx-auto mb-3" />
             <h3 className="text-base font-semibold text-neutral-300">No hay publicaciones con estos filtros</h3>
             <p className="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">
-              Hacé clic en <strong>"Generar lote diario (3)"</strong> para producir los borradores del día asistidos por IA.
+              Hacé clic en <strong>"Generar lote diario (4)"</strong> para producir los borradores del día asistidos por IA.
             </p>
           </div>
         ) : (

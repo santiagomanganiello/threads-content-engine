@@ -6,6 +6,7 @@ export const PostCategoryEnum = z.enum([
   'EDUCATION',
   'CULTURE',
   'HUMOR',
+  'GROWTH',
 ]);
 export type PostCategory = z.infer<typeof PostCategoryEnum>;
 
@@ -69,5 +70,10 @@ export const DAILY_EDITORIAL_SECTIONS: Record<
     name: 'La cocina del bajo',
     category: 'EDUCATION',
     description: 'Técnica, tips prácticos, armonía aplicada, sonido y setup de bajo.',
+  },
+  4: {
+    name: 'Imán de Seguidores',
+    category: 'GROWTH',
+    description: 'Contenido de alto valor para guardar/compartir con llamado a la acción para ganar seguidores (@polagruv).',
   },
 };

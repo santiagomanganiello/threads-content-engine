@@ -1,12 +1,19 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import 'dotenv/config';
+
 import { prisma } from '../apps/api/src/infrastructure/database.js';
 import { generationService } from '../apps/api/src/modules/generation/generation.service.js';
 import { editorialService } from '../apps/api/src/modules/editorial/editorial.service.js';
 import { publishingService } from '../apps/api/src/modules/publishing/publishing.service.js';
+import { MockThreadsPublisher } from '../apps/api/src/adapters/mock-threads-publisher.js';
 
 describe('Threads Content Engine - Editorial & Publishing Core Logic', () => {
   const testBatchDate = `test-${Date.now()}`;
+
+  beforeAll(() => {
+    // Usar mock en tests unitarios para no llamar a la API real de Meta ni gastar cuotas
+    publishingService.setPublisher(new MockThreadsPublisher());
+  });
 
   afterAll(async () => {
     // Clean up test data
@@ -19,17 +26,18 @@ describe('Threads Content Engine - Editorial & Publishing Core Logic', () => {
     await prisma.$disconnect();
   });
 
-  it('1. Genera exactamente 3 borradores diarios para las secciones configuradas', async () => {
+  it('1. Genera exactamente 4 borradores diarios para las secciones configuradas (incluyendo Crecimiento)', async () => {
     const result = await generationService.generateDailyBatch(testBatchDate);
 
     expect(result.batchId).toBe(`daily-generation:${testBatchDate}`);
-    expect(result.posts.length).toBe(3);
+    expect(result.posts.length).toBe(4);
     expect(result.isNew).toBe(true);
 
     const categories = result.posts.map((p) => p.category);
     expect(categories).toContain('BASS_HISTORY');
     expect(categories).toContain('COMMUNITY');
     expect(categories).toContain('EDUCATION');
+    expect(categories).toContain('GROWTH');
 
     // Todos nacen en PENDING_REVIEW
     result.posts.forEach((p) => {
@@ -42,13 +50,13 @@ describe('Threads Content Engine - Editorial & Publishing Core Logic', () => {
     const secondCall = await generationService.generateDailyBatch(testBatchDate);
 
     expect(secondCall.isNew).toBe(false);
-    expect(secondCall.posts.length).toBe(3);
+    expect(secondCall.posts.length).toBe(4);
 
     // Contar en BD
     const count = await prisma.contentPost.count({
       where: { generationBatchId: `daily-generation:${testBatchDate}` },
     });
-    expect(count).toBe(3);
+    expect(count).toBe(4);
   });
 
   it('3. Regla de seguridad: Ningún contenido pendiente de revisión puede publicarse', async () => {

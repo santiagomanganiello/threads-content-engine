@@ -1,9 +1,18 @@
 import { prisma } from '../../infrastructure/database.js';
 import { logger } from '../../infrastructure/logger.js';
 import { getThreadsPublisher } from '../../adapters/index.js';
+import { ThreadsPublisher } from '../../adapters/threads-publisher.interface.js';
 
 export class PublishingService {
-  private publisher = getThreadsPublisher();
+  private publisher: ThreadsPublisher;
+
+  constructor(publisher?: ThreadsPublisher) {
+    this.publisher = publisher || getThreadsPublisher();
+  }
+
+  setPublisher(publisher: ThreadsPublisher) {
+    this.publisher = publisher;
+  }
 
   async publishPost(id: string, idempotencyKeyInput?: string) {
     const post = await prisma.contentPost.findUnique({

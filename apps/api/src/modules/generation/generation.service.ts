@@ -15,13 +15,15 @@ export class GenerationService {
 
     logger.info(`[GenerationService] Verificando lote diario: ${batchId}`);
 
+    const targetCount = Object.keys(DAILY_EDITORIAL_SECTIONS).length;
+
     // Verificar si ya existen borradores generados para este batch
     const existing = await prisma.contentPost.findMany({
       where: { generationBatchId: batchId },
       include: { generations: true },
     });
 
-    if (existing.length >= 3) {
+    if (existing.length >= targetCount) {
       logger.info(`[GenerationService] Lote ${batchId} ya fue generado previamente (${existing.length} posts). Se retorna el lote existente.`);
       return { batchId, posts: existing, isNew: false };
     }

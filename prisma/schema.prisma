@@ -13,6 +13,7 @@ enum PostCategory {
   EDUCATION
   CULTURE
   HUMOR
+  GROWTH
 }
 
 enum PostStatus {

@@ -39,10 +39,10 @@ export const Header: React.FC<HeaderProps> = ({
             <span>Lote de hoy:</span>
             <span
               className={`font-semibold ${
-                todayBatchCount >= 3 ? 'text-emerald-400' : 'text-amber-400'
+                todayBatchCount >= 4 ? 'text-emerald-400' : 'text-amber-400'
               }`}
             >
-              {todayBatchCount}/3 borradores
+              {todayBatchCount}/4 borradores
             </span>
           </div>
 
@@ -60,7 +60,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="text-xs px-4 py-2 bg-white text-black hover:bg-neutral-200 disabled:opacity-50 font-semibold rounded-lg transition flex items-center gap-2 shadow-sm"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isGenerating ? 'animate-spin' : ''}`} />
-            <span>{isGenerating ? 'Generando...' : 'Generar lote diario (3)'}</span>
+            <span>{isGenerating ? 'Generando...' : 'Generar lote diario (4)'}</span>
           </button>
         </div>
       </div>

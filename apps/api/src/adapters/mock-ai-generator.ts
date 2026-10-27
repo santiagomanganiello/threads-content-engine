@@ -115,6 +115,29 @@ const TEMPLATES_BY_CATEGORY: Record<PostCategory, TemplatePool[]> = {
       needsFactCheck: false,
     },
   ],
+  GROWTH: [
+    {
+      hook: 'Lo que nadie te dice para sonar profesional en el bajo sin gastar un centavo.',
+      text: '1. Muteá siempre las cuerdas que no tocás con la palma o el pulgar.\n2. No recortes medios en tu ampli: la presencia vive en 500-800Hz.\n3. Tocá a tempo antes de meter notas rápidas.\n\nTodos los días comparto tips prácticos y secretos de audio para bajistas. Seguime en @polagruv para potenciar tu sonido y guardá este post para tu próximo ensayo.',
+      question: '¿Cuál de estos 3 puntos es el que más te cuesta aplicar en vivo?',
+      factualClaims: [],
+      needsFactCheck: false,
+    },
+    {
+      hook: '3 errores silenciosos que arruinan tu sonido en el bajo.',
+      text: '1. Apretar el mástil con fuerza excesiva (te fatiga y desafina la nota).\n2. Dejar las cuerdas al aire vibrando por simpatía.\n3. Creer que más graves significa más presencia.\n\nSi querés llevar tu nivel en las cuatro cuerdas al siguiente escalón, dale a "Seguir" a @polagruv. Subo contenido diario de técnica, groove y audio real sin vueltas.',
+      question: '¿Cuántos años llevás tocando el bajo?',
+      factualClaims: [],
+      needsFactCheck: false,
+    },
+    {
+      hook: 'Guardá esta guía rápida de ecualización para que tu bajo corte en cualquier mezcla.',
+      text: '• 40-80Hz: Sub-graves (cuidado con tapar el bombo).\n• 200-250Hz: Zona de cartón (recortá un poco si suena bola).\n• 500-800Hz: La definición real de las notas (el secreto de empaste).\n• 2kHz+: Brillo y ataque de dedos o púa.\n\nGuardá este post para tu próxima prueba de sonido y seguime en @polagruv para más secretos de la cocina del bajo.',
+      question: '¿Solés ecualizar plano o ya tenés tu curva favorita?',
+      factualClaims: [],
+      needsFactCheck: false,
+    },
+  ],
 };
 
 export class MockAiGenerator implements ContentGenerator {
