@@ -11,10 +11,16 @@ config({ path: resolve(process.cwd(), '.env') });
 import { getAiGenerator } from '../adapters/index.js';
 import { PostCategory } from '@threads-engine/contracts';
 
+if (process.env.AI_PROVIDER?.toLowerCase() !== 'gemini') {
+  throw new Error('Configurá AI_PROVIDER=gemini en apps/api/.env para probar Gemini.');
+}
+
 const categories: PostCategory[] = ['BASS_HISTORY', 'COMMUNITY', 'EDUCATION', 'GROWTH'];
 
 const gen = getAiGenerator();
 console.log(`\n✅ Generator: ${gen.constructor.name}\n`);
+
+let hasErrors = false;
 
 for (const category of categories) {
   console.log(`\n🎸 Generando categoría: ${category}...`);
@@ -26,8 +32,13 @@ for (const category of categories) {
     console.log(`  FactCheck: ${result.draft.needsFactCheck}`);
     console.log(`  Tokens: ${result.tokensPrompt}p / ${result.tokensCompletion}c`);
   } catch (err) {
+    hasErrors = true;
     console.error(`  ❌ Error:`, err instanceof Error ? err.message : err);
   }
 }
 
-console.log('\n✅ Test completado.');
+if (hasErrors) {
+  process.exitCode = 1;
+} else {
+  console.log('\n✅ Test completado.');
+}

@@ -97,3 +97,11 @@ pnpm --filter @threads-engine/api run worker:publishing
 ```bash
 pnpm test
 ```
+
+### Probar generación con Gemini
+Configurá `AI_PROVIDER=gemini` y una clave nueva en `GEMINI_API_KEY` dentro de `apps/api/.env`. Luego ejecutá:
+```bash
+pnpm --filter @threads-engine/api run test:gemini
+```
+
+La clave no debe compartirse ni incluirse en el repositorio. Si se expuso, revocala y generá una nueva antes de usar Gemini.

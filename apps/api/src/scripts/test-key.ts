@@ -5,8 +5,10 @@ import { config } from 'dotenv';
 import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env') });
 
-const apiKey = process.env.GEMINI_API_KEY!;
-console.log('Key prefix:', apiKey.substring(0, 10) + '...');
+const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+  throw new Error('GEMINI_API_KEY no está configurada en apps/api/.env.');
+}
 
 // Test con timeout de 10 segundos
 const controller = new AbortController();

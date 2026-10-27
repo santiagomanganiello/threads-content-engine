@@ -3,7 +3,8 @@ import { GeneratedContentDraftSchema, PostCategory } from '@threads-engine/contr
 import { ContentGenerator, GenerateDraftParams, GenerationResult } from './ai-generator.interface.js';
 
 const PROMPT_VERSION = 'v1.0-gemini-bass';
-const MODEL_NAME = 'gemini-3.8-flash';
+const PRIMARY_MODEL = 'gemini-3.5-flash';
+const FALLBACK_MODELS = ['gemini-3.1-flash-lite', 'gemini-flash-latest'];
 
 /**
  * Mapa de descripción editorial por categoría para enriquecer el prompt.
@@ -68,53 +69,67 @@ export class GeminiAiGenerator implements ContentGenerator {
   }
 
   async generateDraft(params: GenerateDraftParams): Promise<GenerationResult> {
-    const model = this.client.getGenerativeModel({
-      model: MODEL_NAME,
-      systemInstruction: buildSystemPrompt(),
-      generationConfig: {
-        temperature: 1.0,
-        responseMimeType: 'application/json',
-      },
-    });
-
+    const modelsToTry = [PRIMARY_MODEL, ...FALLBACK_MODELS];
     const userPrompt = buildUserPrompt(params);
+    let lastError: unknown;
 
-    const result = await model.generateContent(userPrompt);
-    const rawResponse = result.response.text().trim();
+    for (const modelName of modelsToTry) {
+      try {
+        const model = this.client.getGenerativeModel({
+          model: modelName,
+          systemInstruction: buildSystemPrompt(),
+          generationConfig: {
+            temperature: 0.8,
+            responseMimeType: 'application/json',
+          },
+        });
 
-    // Con responseMimeType: 'application/json', Gemini retorna JSON puro directamente.
-    // Igual limpiamos por si hay bloques markdown residuales.
-    const jsonText = rawResponse
-      .replace(/^```json\s*/i, '')
-      .replace(/^```\s*/i, '')
-      .replace(/\s*```$/i, '')
-      .trim();
+        const result = await model.generateContent(userPrompt);
+        const rawResponse = result.response.text().trim();
 
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(jsonText);
-    } catch {
-      throw new Error(`[GeminiAiGenerator] Respuesta no es JSON válido: ${rawResponse.substring(0, 200)}`);
+        const jsonText = rawResponse
+          .replace(/^```json\s*/i, '')
+          .replace(/^```\s*/i, '')
+          .replace(/\s*```$/i, '')
+          .trim();
+
+        let parsed: any;
+        try {
+          parsed = JSON.parse(jsonText);
+        } catch {
+          throw new Error(`[GeminiAiGenerator] Respuesta no es JSON válido: ${rawResponse.substring(0, 200)}`);
+        }
+
+        if (typeof parsed === 'object' && parsed !== null) {
+          parsed.category = params.category;
+          if (typeof parsed.text === 'string' && parsed.text.length > 500) {
+            parsed.text = parsed.text.substring(0, 497) + '...';
+          }
+        }
+
+        const draft = GeneratedContentDraftSchema.parse(parsed);
+        const usage = result.response.usageMetadata;
+
+        return {
+          draft,
+          model: modelName,
+          promptVersion: this.promptVersion,
+          promptText: userPrompt,
+          rawResponse,
+          tokensPrompt: usage?.promptTokenCount ?? undefined,
+          tokensCompletion: usage?.candidatesTokenCount ?? undefined,
+        };
+      } catch (err: any) {
+        lastError = err;
+        // Si es 503 (alta demanda) o 429 (rate limit), intentamos con el siguiente modelo en la lista
+        const isTransient = err?.message?.includes('503') || err?.message?.includes('429');
+        if (isTransient) {
+          continue;
+        }
+        throw err;
+      }
     }
 
-    // Forzar la categoría correcta por si Gemini la modifica
-    if (typeof parsed === 'object' && parsed !== null) {
-      (parsed as Record<string, unknown>).category = params.category;
-    }
-
-    // Validar con el esquema Zod compartido
-    const draft = GeneratedContentDraftSchema.parse(parsed);
-
-    const usage = result.response.usageMetadata;
-
-    return {
-      draft,
-      model: MODEL_NAME,
-      promptVersion: this.promptVersion,
-      promptText: userPrompt,
-      rawResponse,
-      tokensPrompt: usage?.promptTokenCount ?? undefined,
-      tokensCompletion: usage?.candidatesTokenCount ?? undefined,
-    };
+    throw lastError;
   }
 }

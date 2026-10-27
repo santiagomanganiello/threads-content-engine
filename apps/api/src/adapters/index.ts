@@ -1,20 +1,12 @@
 import { ContentGenerator } from './ai-generator.interface.js';
 import { MockAiGenerator } from './mock-ai-generator.js';
 import { GeminiAiGenerator } from './gemini-ai-generator.js';
-import { OllamaAiGenerator } from './ollama-ai-generator.js';
 import { ThreadsPublisher } from './threads-publisher.interface.js';
 import { MockThreadsPublisher } from './mock-threads-publisher.js';
 import { MetaThreadsPublisher } from './meta-threads-publisher.js';
 
 export function getAiGenerator(): ContentGenerator {
   const provider = (process.env.AI_PROVIDER || 'mock').toLowerCase();
-
-  if (provider === 'ollama') {
-    return new OllamaAiGenerator({
-      baseUrl: process.env.OLLAMA_BASE_URL,
-      model: process.env.OLLAMA_MODEL,
-    });
-  }
 
   if (provider === 'gemini') {
     const apiKey = process.env.GEMINI_API_KEY;
@@ -24,8 +16,11 @@ export function getAiGenerator(): ContentGenerator {
     return new GeminiAiGenerator(apiKey);
   }
 
-  // Fallback: mock
-  return new MockAiGenerator();
+  if (provider === 'mock') {
+    return new MockAiGenerator();
+  }
+
+  throw new Error(`[getAiGenerator] Proveedor de IA no soportado: ${provider}`);
 }
 
 export function getThreadsPublisher(): ThreadsPublisher {

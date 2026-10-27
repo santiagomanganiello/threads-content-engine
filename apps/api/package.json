@@ -9,6 +9,7 @@
     "start": "node dist/server.js",
     "worker:generation": "tsx watch src/workers/generation.worker.ts",
     "worker:publishing": "tsx watch src/workers/publishing.worker.ts",
+    "test:gemini": "tsx src/scripts/test-gemini.ts",
     "verify:threads": "tsx src/scripts/verify-threads.ts",
     "prisma:generate": "prisma generate --schema=../../prisma/schema.prisma",
     "prisma:migrate": "prisma migrate dev --schema=../../prisma/schema.prisma",
