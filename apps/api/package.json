@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^10.0.2",
+    "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.4.1",
     "@threads-engine/contracts": "workspace:*",
     "bullmq": "^5.41.6",
