@@ -1,0 +1,25 @@
+{
+  "name": "threads-content-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sistema de generación asistida por IA, revisión editorial y publicación controlada en Threads",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @threads-engine/* run dev",
+    "dev:api": "pnpm --filter @threads-engine/api run dev",
+    "dev:web": "pnpm --filter @threads-engine/web run dev",
+    "build": "pnpm --filter @threads-engine/* run build",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:migrate": "prisma migrate dev --schema=prisma/schema.prisma",
+    "db:generate": "prisma generate --schema=prisma/schema.prisma",
+    "db:studio": "prisma studio --schema=prisma/schema.prisma",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@prisma/client": "6.19.3",
+    "dotenv": "^18.0.9",
+    "prisma": "6.19.3",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  }
+}

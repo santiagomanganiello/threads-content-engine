@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PostCategory {
+  BASS_HISTORY
+  COMMUNITY
+  EDUCATION
+  CULTURE
+  HUMOR
+}
+
+enum PostStatus {
+  IDEA
+  GENERATING
+  PENDING_REVIEW
+  APPROVED
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  REJECTED
+  FAILED
+}
+
+enum PublishAttemptStatus {
+  PENDING
+  CONTAINER_CREATED
+  PUBLISHED
+  FAILED
+  UNKNOWN
+}
+
+enum GenerationStatus {
+  SUCCESS
+  FAILED
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+}
+
+model ContentIdea {
+  id          String       @id @default(cuid())
+  topic       String
+  description String?
+  category    PostCategory
+  source      String       @default("manual")
+  usedAt      DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  posts ContentPost[]
+
+  @@map("content_ideas")
+}
+
+model ContentPost {
+  id                String       @id @default(cuid())
+  ideaId            String?
+  idea              ContentIdea? @relation(fields: [ideaId], references: [id], onDelete: SetNull)
+  text              String       @db.VarChar(500)
+  hook              String?
+  question          String?
+  category          PostCategory
+  status            PostStatus   @default(PENDING_REVIEW)
+  scheduledAt       DateTime?
+  publishedAt       DateTime?
+  externalPostId    String?
+  needsFactCheck    Boolean      @default(false)
+  factualClaims     Json?
+  generationBatchId String?
+
+  approvedAt      DateTime?
+  approvedBy      String?
+  rejectedAt      DateTime?
+  rejectionReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  generations     ContentGeneration[]
+  publishAttempts PublishAttempt[]
+  revisions       ContentRevision[]
+
+  @@index([status])
+  @@index([category])
+  @@index([generationBatchId])
+  @@index([scheduledAt])
+  @@map("content_posts")
+}
+
+model ContentGeneration {
+  id               String           @id @default(cuid())
+  postId           String
+  post             ContentPost      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  model            String
+  promptVersion    String
+  prompt           String?          @db.Text
+  rawResponse      String?          @db.Text
+  tokensPrompt     Int?
+  tokensCompletion Int?
+  status           GenerationStatus @default(SUCCESS)
+  errorMessage     String?
+  createdAt        DateTime         @default(now())
+
+  @@index([postId])
+  @@map("content_generations")
+}
+
+model PublishAttempt {
+  id             String               @id @default(cuid())
+  postId         String
+  post           ContentPost          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  idempotencyKey String               @unique
+  status         PublishAttemptStatus @default(PENDING)
+  containerId    String?
+  externalPostId String?
+  errorCode      String?
+  errorMessage   String?              @db.Text
+  attemptNumber  Int                  @default(1)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([postId])
+  @@index([status])
+  @@map("publish_attempts")
+}
+
+model ContentRevision {
+  id                  String      @id @default(cuid())
+  postId              String
+  post                ContentPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  previousText        String      @db.VarChar(500)
+  newText             String      @db.VarChar(500)
+  changedBy           String?
+  changeSource        String      @default("USER_EDIT")
+  invalidatedApproval Boolean     @default(false)
+  createdAt           DateTime    @default(now())
+
+  @@index([postId])
+  @@map("content_revisions")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String?
+  name         String
+  role         UserRole @default(EDITOR)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
