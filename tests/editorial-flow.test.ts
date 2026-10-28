@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import 'dotenv/config';
 
 import { prisma } from '../apps/api/src/infrastructure/database.js';
 import { generationService } from '../apps/api/src/modules/generation/generation.service.js';
@@ -10,26 +9,40 @@ import { MockThreadsPublisher } from '../apps/api/src/adapters/mock-threads-publ
 describe('Threads Content Engine - Editorial & Publishing Core Logic', () => {
   const testBatchDate = `test-${Date.now()}`;
 
+  const testBatchId = `daily-generation:${testBatchDate}`;
+
+  // Guarda los Ids de cada post que el test crea, para borrar solo esos
+  const createdPostIds = new Set<string>();
+
+  const trackPosts = <T extends { id: string }>(posts: T[]): T[] => {
+    posts.forEach((p) => createdPostIds.add(p.id));
+    return posts;
+  };
+
   beforeAll(() => {
     // Usar mock en tests unitarios para no llamar a la API real de Meta ni gastar cuotas
     publishingService.setPublisher(new MockThreadsPublisher());
   });
 
-  afterAll(async () => {
-    // Clean up test data
-    await prisma.contentRevision.deleteMany({});
-    await prisma.publishAttempt.deleteMany({});
-    await prisma.contentGeneration.deleteMany({});
-    await prisma.contentPost.deleteMany({
-      where: { generationBatchId: { contains: 'test-' } },
-    });
-    await prisma.$disconnect();
+    afterAll(async () => {
+      try {
+      if (createdPostIds.size > 0){
+        // Las relaciones tienen onDelete: Cascade, así que revisiones,
+        // intentos de publicación y generaciones se eliminan solas.
+        await prisma.contentPost.deleteMany({
+          where: { id: { in: [...createdPostIds]}},
+        });
+      }
+    } finally {
+      await prisma.$disconnect();
+    }
   });
 
   it('1. Genera exactamente 4 borradores diarios para las secciones configuradas (incluyendo Crecimiento)', async () => {
     const result = await generationService.generateDailyBatch(testBatchDate);
+    trackPosts(result.posts);
 
-    expect(result.batchId).toBe(`daily-generation:${testBatchDate}`);
+    expect(result.batchId).toBe(testBatchId);
     expect(result.posts.length).toBe(4);
     expect(result.isNew).toBe(true);
 
@@ -60,8 +73,8 @@ describe('Threads Content Engine - Editorial & Publishing Core Logic', () => {
   });
 
   it('3. Regla de seguridad: Ningún contenido pendiente de revisión puede publicarse', async () => {
-    const batch = await generationService.generateDailyBatch(testBatchDate);
-    const pendingPost = batch.posts[0];
+    const batch = trackPosts((await generationService.generateDailyBatch(testBatchDate)).posts);
+    const pendingPost = batch[0];
 
     expect(pendingPost.status).toBe('PENDING_REVIEW');
 
@@ -72,8 +85,8 @@ describe('Threads Content Engine - Editorial & Publishing Core Logic', () => {
   });
 
   it('4. Permite aprobar un borrador pendiente', async () => {
-    const batch = await generationService.generateDailyBatch(testBatchDate);
-    const postToApprove = batch.posts[0];
+    const batch = trackPosts((await generationService.generateDailyBatch(testBatchDate)).posts);
+    const postToApprove = batch[0];
 
     const approved = await editorialService.approvePost(postToApprove.id, 'Aprobado para publicar', 'editor-santi');
     expect(approved.status).toBe('APPROVED');
@@ -82,8 +95,8 @@ describe('Threads Content Engine - Editorial & Publishing Core Logic', () => {
   });
 
   it('5. Regla de integridad: Si se modifica el texto de un post aprobado, la aprobación se invalida', async () => {
-    const batch = await generationService.generateDailyBatch(testBatchDate);
-    const post = batch.posts[0];
+    const batch = trackPosts((await generationService.generateDailyBatch(testBatchDate)).posts);
+    const post = batch[0];
 
     // Asegurar que esté aprobado
     await editorialService.approvePost(post.id);
@@ -109,8 +122,8 @@ describe('Threads Content Engine - Editorial & Publishing Core Logic', () => {
   });
 
   it('6. Publicación controlada: Publicar un contenido aprobado registra externalPostId y pasa a PUBLISHED', async () => {
-    const batch = await generationService.generateDailyBatch(testBatchDate);
-    const post = batch.posts[1];
+    const batch = trackPosts((await generationService.generateDailyBatch(testBatchDate)).posts);
+    const post = batch[0];
 
     // 1. Aprobar
     await editorialService.approvePost(post.id, 'Listo para salir');

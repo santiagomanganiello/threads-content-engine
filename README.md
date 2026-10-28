@@ -47,12 +47,12 @@ threads-content-engine/
 
 ## Secciones Editoriales Diarias
 
-La aplicación genera automáticamente 3 borradores diarios con control de idempotencia (`daily-generation:AAAA-MM-DD`):
+La aplicación genera automáticamente 4 borradores diarios con control de idempotencia (`daily-generation:AAAA-MM-DD`):
 
 1. **Bajos que cambiaron el mundo** (`BASS_HISTORY`): Historia musical, líneas icónicas de bajo y grandes leyendas.
 2. **Bajista, si tuvieras que…** (`COMMUNITY`): Preguntas dilemáticas, debate y participación comunitaria.
 3. **La cocina del bajo** (`EDUCATION`): Técnica, tips prácticos, armonía y ecualización.
-
+4. **Contenido de Valor Para Viralidad** (`GROWTH`) Datos de Valor, Tips y Ayudas Para Guardar.
 ---
 
 ## Máquina de Estados y Reglas de Negocio
